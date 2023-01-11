@@ -36,9 +36,9 @@ app.use(express.static("public"));
 app.engine("hbs", exphbs.engine({ defaultLayout: "main", extname: ".hbs" }));
 app.set("view engine", "hbs");
 
-app.get("", (req, res) => {
-  res.render("home");
-});
+// user routes
+const routes = require("./server/routes/user");
+app.use("", routes);
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
