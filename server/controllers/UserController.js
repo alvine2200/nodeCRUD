@@ -76,3 +76,41 @@ exports.create_user = (req, res) => {
     );
   });
 };
+
+exports.edit_user = (req, res) => {
+  pool.getConnection((err, conn) => {
+    if (err) {
+      console.log(err);
+    } else {
+      conn.query(
+        "Select * from users where id = ?",
+        [req.params.id],
+        (err, rows) => {
+          if (err) throw err;
+          res.render("edit_user", { rows });
+          console.log("User fetched \n", rows);
+        }
+      );
+    }
+  });
+};
+
+exports.update_user = (req, res) => {
+  const { first_name, last_name, email, phone } = req.body;
+  pool.getConnection((err, conn) => {
+    if (err) throw err;
+    conn.query(
+      "UPDATE users SET first_name = ?, last_name = ?, email = ?, phone = ?  where id = ?",
+      [first_name, last_name, email, phone, req.params.id],
+      (err, rows) => {
+        if (err) {
+          // throw err;
+          console.log(err);
+        } else {
+          res.render("edit_user", { alert: "User successfully updated" });
+          console.log(rows);
+        }
+      }
+    );
+  });
+};
