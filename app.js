@@ -3,6 +3,7 @@ const express = require("express");
 const exphbs = require("express-handlebars");
 const bodyParser = require("body-parser");
 const mysql = require("mysql2");
+const fileUpload = require("express-fileupload");
 
 require("dotenv").config();
 
@@ -25,12 +26,14 @@ pool.getConnection((err, conn) => {
 
 // parsing midleware
 app.use(bodyParser.urlencoded({ extended: false }));
-
+// use fileUpload
+app.use(fileUpload());
 // parse only json
 app.use(bodyParser.json());
 
 // use static files in a folder
 app.use(express.static("public"));
+app.use(express.static("Uploads"));
 
 // template engines for handlesbars hbs
 app.engine("hbs", exphbs.engine({ defaultLayout: "main", extname: ".hbs" }));

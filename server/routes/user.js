@@ -9,5 +9,6 @@ router.post("/create_user", userController.create_user);
 router.get("/edit_user/:id", userController.edit_user);
 router.post("/update_user/:id", userController.update_user);
 router.get("/destroy_user/:id", userController.delete_user);
+router.post("/post_file", userController.file_upload);
 
 module.exports = router;

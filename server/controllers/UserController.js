@@ -1,4 +1,5 @@
 const mysql = require("mysql2");
+const fileUpload = require("express-fileupload");
 // const Connection = require('mysql2/typings/mysql/lib/Connection');
 
 const pool = mysql.createPool({
@@ -12,7 +13,7 @@ const pool = mysql.createPool({
 exports.index = (req, res) => {
   pool.getConnection((err, conn) => {
     if (err) throw err;
-    console.log("connected as id" + conn.threadId);
+    // console.log("connected as id" + conn.threadId);
 
     conn.query("SELECT * FROM users", (err, rows) => {
       conn.release();
@@ -31,7 +32,7 @@ exports.index = (req, res) => {
 exports.find = (req, res) => {
   pool.getConnection((err, conn) => {
     if (err) throw err;
-    console.log("connected as id" + conn.threadId);
+    // console.log("connected as id" + conn.threadId);
 
     let searchKey = req.body.search;
 
@@ -54,7 +55,7 @@ exports.find = (req, res) => {
 };
 
 exports.add_user = (req, res) => {
-  console.log("User Page hit");
+  // console.log("User Page hit");
   res.render("add_user");
 };
 
@@ -69,7 +70,7 @@ exports.create_user = (req, res) => {
         conn.release();
         if (!err) {
           res.render("add_user", { alert: "User Added Successfully" });
-          console.log("User created successfully with id " + conn.threadId);
+          // console.log("User created successfully with id " + conn.threadId);
         } else {
           console.log(err);
         }
@@ -90,7 +91,7 @@ exports.edit_user = (req, res) => {
           conn.release();
           if (err) throw err;
           res.render("edit_user", { rows });
-          console.log("User fetched \n", rows);
+          // console.log("User fetched \n", rows);
         }
       );
     }
@@ -120,7 +121,7 @@ exports.update_user = (req, res) => {
                   conn.release();
                   if (err) throw err;
                   res.render("edit_user", { rows });
-                  console.log("User fetched \n", rows);
+                  // console.log("User fetched \n", rows);
                 }
               );
             }
@@ -143,9 +144,42 @@ exports.delete_user = (req, res) => {
           conn.release();
           if (err) throw err;
           res.redirect("/");
-          console.log("User fetched \n", rows);
+          // console.log("User fetched \n", rows);
         }
       );
     }
+  });
+};
+
+// file uploading
+exports.file_upload = (req, res) => {
+  pool.getConnection((err, conn) => {
+    let filename;
+    let filepath;
+
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).send("No files were uploaded");
+    }
+
+    filename = req.files.image;
+    filepath = __dirname + "/Uploads" + filename.name;
+
+    filename.mv(filepath, function (err) {
+      if (err) return res.status(500).send(err);
+    });
+
+    if (err) throw err;
+    conn.query(
+      "Insert into uploads set image = ?",
+      [filename.name],
+      (err, rows) => {
+        if (!err) {
+          console.log(rows);
+          return res.redirect("/");
+        } else {
+          console.log(err);
+        }
+      }
+    );
   });
 };
