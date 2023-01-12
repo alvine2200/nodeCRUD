@@ -1,5 +1,5 @@
 const mysql = require("mysql2");
-const fileUpload = require("express-fileupload");
+// const fileUpload = require("express-fileupload");
 // const Connection = require('mysql2/typings/mysql/lib/Connection');
 
 const pool = mysql.createPool({
@@ -20,11 +20,12 @@ exports.index = (req, res) => {
 
       if (!err) {
         res.render("home", { rows });
+        // return res.redirect("/");
       } else {
         console.log(err);
       }
 
-      console.log(rows);
+      // console.log(rows);
     });
   });
 };
@@ -162,7 +163,7 @@ exports.file_upload = (req, res) => {
     }
 
     filename = req.files.image;
-    filepath = __dirname + "/Uploads" + filename.name;
+    filepath = __dirname + "/uploads/" + filename.name;
 
     filename.mv(filepath, function (err) {
       if (err) return res.status(500).send(err);
@@ -173,6 +174,7 @@ exports.file_upload = (req, res) => {
       "Insert into uploads set image = ?",
       [filename.name],
       (err, rows) => {
+        conn.release();
         if (!err) {
           console.log(rows);
           return res.redirect("/");
