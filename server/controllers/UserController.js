@@ -66,6 +66,7 @@ exports.create_user = (req, res) => {
       "INSERT INTO users SET first_name = ?, last_name = ? , email = ? , phone = ?",
       [first_name, last_name, email, phone],
       (err, rows) => {
+        conn.release();
         if (!err) {
           res.render("add_user", { alert: "User Added Successfully" });
           console.log("User created successfully with id " + conn.threadId);
@@ -86,6 +87,7 @@ exports.edit_user = (req, res) => {
         "Select * from users where id = ?",
         [req.params.id],
         (err, rows) => {
+          conn.release();
           if (err) throw err;
           res.render("edit_user", { rows });
           console.log("User fetched \n", rows);
@@ -103,14 +105,47 @@ exports.update_user = (req, res) => {
       "UPDATE users SET first_name = ?, last_name = ?, email = ?, phone = ?  where id = ?",
       [first_name, last_name, email, phone, req.params.id],
       (err, rows) => {
+        conn.release();
         if (err) {
-          // throw err;
           console.log(err);
         } else {
-          res.render("edit_user", { alert: "User successfully updated" });
-          console.log(rows);
+          pool.getConnection((err, conn) => {
+            if (err) {
+              console.log(err);
+            } else {
+              conn.query(
+                "Select * from users where id = ?",
+                [req.params.id],
+                (err, rows) => {
+                  conn.release();
+                  if (err) throw err;
+                  res.render("edit_user", { rows });
+                  console.log("User fetched \n", rows);
+                }
+              );
+            }
+          });
         }
       }
     );
+  });
+};
+
+exports.delete_user = (req, res) => {
+  pool.getConnection((err, conn) => {
+    if (err) {
+      console.log(err);
+    } else {
+      conn.query(
+        "Delete from users where id = ?",
+        [req.params.id],
+        (err, rows) => {
+          conn.release();
+          if (err) throw err;
+          res.redirect("/");
+          console.log("User fetched \n", rows);
+        }
+      );
+    }
   });
 };
